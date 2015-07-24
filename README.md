@@ -1,9 +1,9 @@
 HOW TO RUN
 
-#turn off firewall
+1) turn off firewall
 sudo ufw disable
 
-#open afni real time
+2) open afni real time
 export PATH=$PATH:/usr/lib/afni/bin
 sudo afni -rt
 
@@ -32,14 +32,15 @@ AFNI_REALTIME_MP_HOST_PORT = localhost:53214
 set+close
 
 
-#open other terminal
+3)listen motion parameters
+open other terminal
 export PATH=$PATH:/usr/lib/afni/bin
 realtime_receiver.py -show_data yes
 #listen port 53214
 or python motion_tracker.py
 
 
-
+4) send motion parameters
 #open other terminal
 export PATH=$PATH:/usr/lib/afni/bin
 cd Documents/projects/NKI-tabs/bin

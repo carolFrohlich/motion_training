@@ -66,7 +66,7 @@ def cross_color(cross, color):
 
 #TODO: 
 	#change cross size
-	#cross should be always on the screen
+	#change axis
 
 
 #start psychopy
@@ -114,7 +114,19 @@ while 1:
 		y_coord = params[1]*10
 		z_coord = params[3]*10
 
+		#don't allow cross to leave screen
+		if x_coord > 0.85:
+			x_coord = 0.85
+		if x_coord < -0.85:
+			x_coord = -0.85
+
+		if y_coord > 0.85:
+			y_coord = 0.85
+		if y_coord < -0.85:
+			y_coord = 0.85
+
 		cross_pos(cross, y_coord, y_coord)
+		
 
 
 		#update position z (zoom cross in or out)

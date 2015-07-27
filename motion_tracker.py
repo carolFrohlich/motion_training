@@ -8,8 +8,9 @@ import struct
 from psychopy import visual, core
 import numpy as np
 
-SCALE = 0.4
+SCALE = 0.2
 LINE_WIDTH = 4.0
+coord_scale=2
 
 def draw_cross(scale):
 	#up
@@ -70,7 +71,7 @@ def cross_clear(cross):
 
 #start psychopy
 old_params = [0.0]*6
-win = visual.Window( [1024, 768] ,fullscr=False)#,mon='monitor_name' )
+win = visual.Window( [1024, 768] ,fullscr=True)#,mon='monitor_name' )
 cross = draw_cross(SCALE)
 
 for stim in cross:
@@ -79,8 +80,8 @@ for stim in cross:
 win.flip()
 
 
-TCP_IP = '127.0.0.1'
-TCP_PORT = 53214
+TCP_IP = '0.0.0.0'
+TCP_PORT = 8000
 BUFFER_SIZE = 1024
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -113,9 +114,9 @@ while 1:
 
 
 		###### update screen ######
-		x_coord = params[0]*10
-		y_coord = params[1]*10
-		z_coord = params[3]*10
+		x_coord = params[0]*coord_scale
+		y_coord = params[1]*coord_scale
+		z_coord = params[3]*coord_scale
 
 		#update position z (zoom cross in or out)
 		scale = SCALE

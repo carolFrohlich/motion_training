@@ -2,8 +2,6 @@ import os
 import signal
 import subprocess
 import sys
-import socket
-import struct
 
 from psychopy import visual, core
 import numpy as np
@@ -53,10 +51,13 @@ def draw_cross():
 
 	return stims
 
+
 def cross_pos(cross, x, y):
 	for stim in cross:
 		stim.pos = (x,y)
 		stim.draw()
+
+
 
 def cross_color(cross, color):
 	for stim in cross:
@@ -67,64 +68,61 @@ def cross_color(cross, color):
 #TODO: 
 	#change cross size
 	#cross should be always on the screen
+	#move cross smoothly (ouvir a porta em vez de pegar o output do terminal)
 
 
 #start psychopy
-old_params = [0.0]*6
 win = visual.Window( [1024, 768] ,fullscr=False)#,mon='monitor_name' )
 cross = draw_cross()
 win.flip()
 
 
-TCP_IP = '127.0.0.1'
-TCP_PORT = 53214
-BUFFER_SIZE = 1024
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+process = subprocess.Popen(['realtime_receiver.py', '-show_data', 'yes'], stdout=subprocess.PIPE)
 
-s.bind((TCP_IP, TCP_PORT))
+old_mov_params = [0.0]*6
 
-s.listen(1)
+while True:
 
-conn, addr = s.accept()
-print 'Connection address:', addr
+	#parse mov params
+	line = process.stdout.readline()
+	
+	if 'recv motion' in line:
+		new_mov_params = []
 
+		mov_params = line[20:].split('   ')
 
-
-
-while 1:
-
-	data = conn.recv(BUFFER_SIZE)
-	if not data: break
-
-	###### receive 6 mov params ######
-	if len(data) == 24:
-		params = []
-		for i in range(6):
-			param = struct.unpack('f',  data[i*4:i*4+4])[0]
-			params.append(param)
+		#parse floats
+		for p in mov_params:
+			try:
+				new_mov_params.append(float(p))
+			except ValueError:
+				pass
 
 			
+		#sys.stdout.write(str(new_mov_params) + '\n')
+		#sys.stdout.flush()
 
 
 		###### update screen ######
 
+
 		#update position x,y
-		x_coord = params[0]*10
-		y_coord = params[1]*10
-		z_coord = params[3]*10
+		x_coord = new_mov_params[0]*10
+		y_coord = new_mov_params[1]*10
+		z_coord = new_mov_params[3]*10
 
 		cross_pos(cross, y_coord, y_coord)
 
 
 		#update position z (zoom cross in or out)
-		#print z_coord
-		#if z_coord > 0:
-
+		print z_coord
+		if z_coord > 0:
+			
 
 
 		# set cross color according to movment
-		mov_distance = np.linalg.norm(np.asarray(params) - np.asarray(old_params))
+		mov_distance = np.linalg.norm(np.asarray(new_mov_params) - np.asarray(old_mov_params))
 
 
 		# set color to green if not moving
@@ -139,7 +137,7 @@ while 1:
 		cross_color(cross, new_color)
 
 
-		old_params = params
+		old_mov_params = new_mov_params
 
 		
 		win.flip()

@@ -11,68 +11,71 @@ import numpy as np
 SCALE = 0.4
 LINE_WIDTH = 4.0
 
-def draw_cross():
+def draw_cross(scale):
 	#up
 	stim1 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim1.vertices = [[ -0.1*SCALE, 0.2*SCALE], [0.0*SCALE, 0.3*SCALE], [0.1*SCALE, 0.2*SCALE]]
+	stim1.vertices = [[ -0.1*scale, 0.2*scale], [0.0*scale, 0.3*scale], [0.1*scale, 0.2*scale]]
 
 	stim2 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim2.vertices = [[ -0.1*SCALE, 0.3*SCALE], [0.0*SCALE, 0.4*SCALE], [0.1*SCALE, 0.3*SCALE]]
+	stim2.vertices = [[ -0.1*scale, 0.3*scale], [0.0*scale, 0.4*scale], [0.1*scale, 0.3*scale]]
 
 
 	#right
 	stim3 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim3.vertices = [[ 0.3*SCALE, -0.1*SCALE], [0.4*SCALE, 0.0*SCALE], [0.3*SCALE, 0.1*SCALE]]
+	stim3.vertices = [[ 0.3*scale, -0.1*scale], [0.4*scale, 0.0*scale], [0.3*scale, 0.1*scale]]
 
 	stim4 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim4.vertices = [[ 0.2*SCALE, -0.1*SCALE], [0.3*SCALE, 0.0*SCALE], [0.2*SCALE, 0.1*SCALE]]
+	stim4.vertices = [[ 0.2*scale, -0.1*scale], [0.3*scale, 0.0*scale], [0.2*scale, 0.1*scale]]
 
 
 	#down
 	stim5 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim5.vertices = [[0.1*SCALE, -0.2*SCALE], [0.0*SCALE, -0.3*SCALE], [-0.1*SCALE, -0.2*SCALE]]
+	stim5.vertices = [[0.1*scale, -0.2*scale], [0.0*scale, -0.3*scale], [-0.1*scale, -0.2*scale]]
 
 	stim6 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim6.vertices = [[ 0.1*SCALE, -0.3*SCALE], [0.0*SCALE, -0.4*SCALE], [-0.1*SCALE, -0.3*SCALE]]
+	stim6.vertices = [[ 0.1*scale, -0.3*scale], [0.0*scale, -0.4*scale], [-0.1*scale, -0.3*scale]]
 
 
 	#left
 	stim7 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim7.vertices = [[ -0.3*SCALE, 0.1*SCALE], [-0.4*SCALE, 0.0*SCALE], [-0.3*SCALE, -0.1*SCALE]]
+	stim7.vertices = [[ -0.3*scale, 0.1*scale], [-0.4*scale, 0.0*scale], [-0.3*scale, -0.1*scale]]
 
 	stim8 = visual.ShapeStim(win,lineWidth=LINE_WIDTH,closeShape=False)
-	stim8.vertices = [[ -0.2*SCALE, 0.1*SCALE], [-0.3*SCALE, 0.0*SCALE], [-0.2*SCALE, -0.1*SCALE]]
+	stim8.vertices = [[ -0.2*scale, 0.1*scale], [-0.3*scale, 0.0*scale], [-0.2*scale, -0.1*scale]]
 
 
-	circle = visual.Circle(win, radius=0.05*SCALE, lineWidth=LINE_WIDTH)
+	circle = visual.Circle(win, radius=0.05*scale, lineWidth=LINE_WIDTH)
 
-	stims = [stim1, stim2, stim3, stim4, stim5,stim6, stim7, stim8, circle]
-
-	for s in stims:
-		s.draw()		
+	stims = [stim1, stim2, stim3, stim4, stim5,stim6, stim7, stim8, circle]		
 
 	return stims
 
 def cross_pos(cross, x, y):
 	for stim in cross:
 		stim.pos = (x,y)
-		stim.draw()
 
 def cross_color(cross, color):
 	for stim in cross:
 		stim.lineColor = color
-		stim.draw()
+
+def cross_clear(cross):
+	for stim in cross:
+		del(stim)
+	del(cross)
 
 
 #TODO: 
-	#change cross size
 	#change axis
 
 
 #start psychopy
 old_params = [0.0]*6
 win = visual.Window( [1024, 768] ,fullscr=False)#,mon='monitor_name' )
-cross = draw_cross()
+cross = draw_cross(SCALE)
+
+for stim in cross:
+	stim.draw()
+
 win.flip()
 
 
@@ -91,7 +94,6 @@ print 'Connection address:', addr
 
 
 
-
 while 1:
 
 	data = conn.recv(BUFFER_SIZE)
@@ -99,20 +101,39 @@ while 1:
 
 	###### receive 6 mov params ######
 	if len(data) == 24:
+
+		#clean screen, delete cross
+		#cross_clear(cross)
+
+
 		params = []
 		for i in range(6):
 			param = struct.unpack('f',  data[i*4:i*4+4])[0]
 			params.append(param)
 
-			
-
 
 		###### update screen ######
-
-		#update position x,y
 		x_coord = params[0]*10
 		y_coord = params[1]*10
 		z_coord = params[3]*10
+
+		#update position z (zoom cross in or out)
+		scale = SCALE
+		if z_coord > 0:
+			scale = SCALE + z_coord
+		elif z_coord < 0:
+			scale = SCALE - z_coord
+
+
+		if scale > 0.8:
+			scale = 0.8
+		if scale < 0.3:
+			scale = 0.3
+
+
+		cross = draw_cross(scale)
+
+
 
 		#don't allow cross to leave screen
 		if x_coord > 0.85:
@@ -129,13 +150,8 @@ while 1:
 		
 
 
-		#update position z (zoom cross in or out)
-		#print z_coord
-		#if z_coord > 0:
 
-
-
-		# set cross color according to movment
+		###### set cross color according to movment ######
 		mov_distance = np.linalg.norm(np.asarray(params) - np.asarray(old_params))
 
 
@@ -153,7 +169,9 @@ while 1:
 
 		old_params = params
 
-		
+		for stim in cross:
+			stim.draw()
+
 		win.flip()
 
 

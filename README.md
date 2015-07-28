@@ -37,13 +37,14 @@ open other terminal
 export PATH=$PATH:/usr/lib/afni/bin
 realtime_receiver.py -show_data yes
 listen port 53214
-or python motion_tracker.py
+or 
+python motion_tracker.py
 
 
 4) send motion parameters
 open other terminal
 export PATH=$PATH:/usr/lib/afni/bin
 cd Documents/projects/NKI-tabs/bin
-rtfeedme -dt 100 -host localhost ../sim/original_brik__002+orig
+rtfeedme -3D -dt 100 -host localhost ../sim/original_brik__002+orig
 
 

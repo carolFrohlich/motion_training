@@ -7,43 +7,12 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import numpy as np
+from objloader2 import *
+
+import sys
 
 
-coord_scale=2.0
-
-
-verticies = (
-    (1, -1, -1),
-    (1, 1, -1),
-    (-1, 1, -1),
-    (-1, -1, -1),
-    (1, -1, 1),
-    (1, 1, 1),
-    (-1, -1, 1),
-    (-1, 1, 1)
-    )
-
-edges = (
-    (0,1),
-    (0,3),
-    (0,4),
-    (2,1),
-    (2,3),
-    (2,7),
-    (6,3),
-    (6,4),
-    (6,7),
-    (5,1),
-    (5,4),
-    (5,7)
-    )
-
-def Cube():
-    glBegin(GL_LINES)
-    for edge in edges:
-        for vertex in edge:
-            glVertex3fv(verticies[vertex])
-    glEnd()
+coord_scale=10.0
 
 
 
@@ -54,15 +23,35 @@ pygame.init()
 display = (800,600)
 pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
 
+glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1)
+#glLightfv(GL_LIGHT0, GL_POSITION,  (0.0, 0.0, 800.0, 50.0))
+glLightfv(GL_LIGHT0, GL_POSITION,  (0.0, 0.0, 800.0, 50.0))
+glLightfv(GL_LIGHT0, GL_AMBIENT, (0.1, 0.1, 0.1, 0.0))
+glLightfv(GL_LIGHT0, GL_DIFFUSE, (1.0, 1.0, 1.0, 0.0))
+glLightfv(GL_LIGHT0, GL_SPECULAR, (1.0, 1.0, 1.0, 0.0))
+
+glEnable(GL_LIGHT0)
+glEnable(GL_LIGHTING)
+
+glMaterialfv(GL_FRONT, GL_SPECULAR, (1.0, 1.0, 1.0, 0.0) )
+glMaterialfv(GL_FRONT, GL_SHININESS,(50.0))
+
+
 glMatrixMode( GL_PROJECTION )
 glLoadIdentity()
-gluPerspective(45, (display[0]/display[1]), 0.1, 50.0)
-glTranslatef(0.0,0.0, -10)
+gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
+glTranslatef(0.0,0.0, -200)
+glRotatef(90.0,45.0,0.0, 0.0)
 
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-Cube()
+brain = OBJ('XY_Pichu.obj', swapyz=True)
+#brain2 = OBJ('rh.pial.obj', swapyz=True)
+glCallList(brain.gl_list)
+#glCallList(brain2.gl_list)
 pygame.display.flip()
+print('finish loading')
+
 
 ###### start socket ######
 # Listens the port in which afni rt will send the movement parameters.
@@ -134,12 +123,16 @@ while 1:
 		glMatrixMode( GL_MODELVIEW )
 		glLoadIdentity()
 		
-		glColor(color)
-		glTranslatef(coords[0], coords[2], coords[1])
-		glRotatef(2, coords[3], coords[5], coords[4])
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-		Cube()
+		#glColor(color)
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, color )
+		glMaterialfv(GL_FRONT, GL_AMBIENT, color )
 
+		glTranslatef(coords[0], coords[2], coords[1])
+		glRotatef(coord_scale, coords[3], coords[5], coords[4])
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+
+		glCallList(brain.gl_list)
+		#glCallList(brain2.gl_list)
 
 		#keep the current paramenter for calculation distance in the next TR
 		old_params = params

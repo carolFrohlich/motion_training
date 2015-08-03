@@ -2,7 +2,7 @@
 # Wavefront OBJ file
 # Created with Kaydara FBX
 # 
-mtllib xy_pichu.mtl
+mtllib pichu/xy_pichu.mtl
 
 g Pichu
 v 6.386857 15.080224 8.258579

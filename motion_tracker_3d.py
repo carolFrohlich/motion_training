@@ -7,7 +7,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import numpy as np
-from objloader2 import *
+from objloader import *
 
 import sys
 
@@ -23,29 +23,65 @@ pygame.init()
 display = (800,600)
 pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
 
-glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1)
-#glLightfv(GL_LIGHT0, GL_POSITION,  (0.0, 0.0, 800.0, 50.0))
-glLightfv(GL_LIGHT0, GL_POSITION,  (0.0, 0.0, 800.0, 50.0))
-glLightfv(GL_LIGHT0, GL_AMBIENT, (0.1, 0.1, 0.1, 0.0))
-glLightfv(GL_LIGHT0, GL_DIFFUSE, (1.0, 1.0, 1.0, 0.0))
-glLightfv(GL_LIGHT0, GL_SPECULAR, (1.0, 1.0, 1.0, 0.0))
-
+glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+glLightfv(GL_LIGHT0, GL_DIFFUSE, (1, 1, 1, 1.0))
 glEnable(GL_LIGHT0)
-glEnable(GL_LIGHTING)
 
-glMaterialfv(GL_FRONT, GL_SPECULAR, (1.0, 1.0, 1.0, 0.0) )
-glMaterialfv(GL_FRONT, GL_SHININESS,(50.0))
+glLightfv(GL_LIGHT1, GL_POSITION,  (-40, -200, 100, 0.0))
+glLightfv(GL_LIGHT1, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+glLightfv(GL_LIGHT1, GL_DIFFUSE, (1, 1, 1, 1.0))
+glEnable(GL_LIGHT1)
+
+glLightfv(GL_LIGHT2, GL_POSITION,  (40, 200, 100, 0.0))
+glLightfv(GL_LIGHT2, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+glLightfv(GL_LIGHT2, GL_DIFFUSE, (1, 1, 1, 1.0))
+glEnable(GL_LIGHT2)
+
+glLightfv(GL_LIGHT3, GL_POSITION,  (40, -200, 100, 0.0))
+glLightfv(GL_LIGHT3, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+glLightfv(GL_LIGHT3, GL_DIFFUSE, (1, 1, 1, 1.0))
+glEnable(GL_LIGHT3)
+
+
+glEnable(GL_LIGHTING)
+glEnable(GL_COLOR_MATERIAL)
+glEnable(GL_DEPTH_TEST)
+glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
 
 
 glMatrixMode( GL_PROJECTION )
 glLoadIdentity()
 gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
+
+#if tardis
+# glTranslatef(-5.0,0.0, -40)
+# glRotatef(90.0, 1.0, 0.0, 0.0)
+# glRotatef(180.0, 0.0, 1.0, 0.0)
+# brain = OBJ('Tardis.obj', swapyz=True)
+
+#if pichu
+brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
 glTranslatef(0.0,0.0, -200)
-glRotatef(90.0,45.0,0.0, 0.0)
+glRotatef(90.0, 1.0, 0.0, 0.0)
+glRotatef(180.0, 0.0, 1.0, 0.0)
+
+#if plane
+# glTranslatef(0.0,0.0, -300)
+# glRotatef(45.0, 0.0, 1.0, 0.0)
+# #glRotatef(90.0, 0.0, 1.0, 0.0)
+# brain = OBJ('plane.obj', swapyz=True)
+
+#if skull
+# glTranslatef(0.0,0.0, -30)
+# glRotatef(90.0, 1.0, 0.0, 0.0)
+# glRotatef(180.0, 0.0, 1.0, 0.0)
+# brain = OBJ('skull.obj', swapyz=True)
+
 
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-brain = OBJ('XY_Pichu.obj', swapyz=True)
+
 #brain2 = OBJ('rh.pial.obj', swapyz=True)
 glCallList(brain.gl_list)
 #glCallList(brain2.gl_list)
@@ -111,11 +147,11 @@ while 1:
 		# and if participant is moving too much (distance >= 0.2) set color to red
 		mov_distance = np.linalg.norm(np.asarray(params) - np.asarray(old_params))
 
-		color = [0.0, 1.0, 0.0]
+		glClearColor(0, 0.6, 0, 0.0)
 		if mov_distance >= 0.2:
-			color = [1.0, 0.0, 0.0]
+			glClearColor(1, 0.5, 0.5, 0.0)
 		elif mov_distance < 0.2 and mov_distance > 0.1:
-			color = [1.0, 1.0, 0.0] 
+			glClearColor(0.6, 0.6, 0, 0.0)
 		
 
 		#update screen
@@ -124,8 +160,7 @@ while 1:
 		glLoadIdentity()
 		
 		#glColor(color)
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, color )
-		glMaterialfv(GL_FRONT, GL_AMBIENT, color )
+
 
 		glTranslatef(coords[0], coords[2], coords[1])
 		glRotatef(coord_scale, coords[3], coords[5], coords[4])

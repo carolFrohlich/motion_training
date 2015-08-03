@@ -20,8 +20,12 @@ coord_scale=10.0
 #creates a full screen window and draw a white cross on the screen while waiting for inputs
 ############################
 pygame.init()
-display = (800,600)
-pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
+
+screen_info = pygame.display.Info()
+#display = (800,600)
+display = (screen_info.current_w, screen_info.current_h)
+
+pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
 
 glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
 glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
@@ -60,31 +64,31 @@ gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
 # glRotatef(180.0, 0.0, 1.0, 0.0)
 # brain = OBJ('Tardis.obj', swapyz=True)
 
-#if pichu
-brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
-glTranslatef(0.0,0.0, -200)
-glRotatef(90.0, 1.0, 0.0, 0.0)
-glRotatef(180.0, 0.0, 1.0, 0.0)
+##if pichu
+# brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
+# glTranslatef(0.0,0.0, -200)
+# glRotatef(90.0, 1.0, 0.0, 0.0)
+# glRotatef(180.0, 0.0, 1.0, 0.0)
 
-#if plane
-# glTranslatef(0.0,0.0, -300)
-# glRotatef(45.0, 0.0, 1.0, 0.0)
-# #glRotatef(90.0, 0.0, 1.0, 0.0)
-# brain = OBJ('plane.obj', swapyz=True)
+# #if plane
+brain = OBJ('plane.obj', swapyz=True)
+glTranslatef(0.0,0.0, -300)
+glRotatef(90.0, 0.0, 1.0, 0.0)
+glRotatef(-90.0, 1.0, 0.0, 0.0)
+
 
 #if skull
+# brain = OBJ('SKULL.OBJ', swapyz=True)
 # glTranslatef(0.0,0.0, -30)
 # glRotatef(90.0, 1.0, 0.0, 0.0)
 # glRotatef(180.0, 0.0, 1.0, 0.0)
-# brain = OBJ('skull.obj', swapyz=True)
+
 
 
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-#brain2 = OBJ('rh.pial.obj', swapyz=True)
 glCallList(brain.gl_list)
-#glCallList(brain2.gl_list)
 pygame.display.flip()
 print('finish loading')
 
@@ -158,8 +162,6 @@ while 1:
 
 		glMatrixMode( GL_MODELVIEW )
 		glLoadIdentity()
-		
-		#glColor(color)
 
 
 		glTranslatef(coords[0], coords[2], coords[1])

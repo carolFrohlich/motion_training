@@ -8,6 +8,7 @@ from OpenGL.GLU import *
 
 import numpy as np
 from objloader import *
+import os
 
 import sys
 
@@ -25,7 +26,43 @@ screen_info = pygame.display.Info()
 #display = (800,600)
 display = (screen_info.current_w, screen_info.current_h)
 
-pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
+
+pichu = pygame.image.load(os.path.join('assets', 'pichu.png'))
+pichurect = pichu.get_rect()
+pichurect.centerx = display[0] / 2 - display[0] * 0.1
+pichurect.centery += display[0] * 0.15
+plane = pygame.image.load(os.path.join('assets', 'plane.png'))
+planerect = plane.get_rect()
+planerect.centerx = display[0] / 2 + display[0] * 0.1
+planerect.centery += display[0] * 0.15
+
+
+
+screen = pygame.display.set_mode(display, DOUBLEBUF|RESIZABLE)
+
+#user choose obj
+screen.blit(pichu, pichurect)
+screen.blit(plane, planerect)
+pygame.display.flip()
+
+option = 0
+while True:
+	for event in pygame.event.get():
+		if event.type == QUIT:
+			pygame.quit()
+			sys.exit()
+		if event.type == KEYDOWN and event.key == pygame.K_1:
+			option = 1
+		elif event.type == KEYDOWN and event.key == pygame.K_2:
+			option = 2
+
+	if option != 0:
+		break
+
+
+pichu = None
+plane = None
+screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
 
 glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
 glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
@@ -58,6 +95,11 @@ glMatrixMode( GL_PROJECTION )
 glLoadIdentity()
 gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
 
+
+
+
+
+
 #if tardis
 # glTranslatef(-5.0,0.0, -40)
 # glRotatef(90.0, 1.0, 0.0, 0.0)
@@ -65,16 +107,18 @@ gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
 # brain = OBJ('Tardis.obj', swapyz=True)
 
 ##if pichu
-# brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
-# glTranslatef(0.0,0.0, -200)
-# glRotatef(90.0, 1.0, 0.0, 0.0)
-# glRotatef(180.0, 0.0, 1.0, 0.0)
+if option == 1:
+	brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
+	glTranslatef(0.0,0.0, -200)
+	glRotatef(80.0, 1.0, 0.0, 0.0)
+	glRotatef(180.0, 0.0, 1.0, 0.0)
 
 # #if plane
-brain = OBJ('plane.obj', swapyz=True)
-glTranslatef(0.0,0.0, -300)
-glRotatef(90.0, 0.0, 1.0, 0.0)
-glRotatef(-90.0, 1.0, 0.0, 0.0)
+else:
+	brain = OBJ('plane.obj', swapyz=True)
+	glTranslatef(0.0,0.0, -400)
+	glRotatef(90.0, 0.0, 1.0, 0.0)
+	glRotatef(-90.0, 1.0, 0.0, 0.0)
 
 
 #if skull
@@ -151,11 +195,11 @@ while 1:
 		# and if participant is moving too much (distance >= 0.2) set color to red
 		mov_distance = np.linalg.norm(np.asarray(params) - np.asarray(old_params))
 
-		glClearColor(0, 0.6, 0, 0.0)
-		if mov_distance >= 0.2:
-			glClearColor(1, 0.5, 0.5, 0.0)
-		elif mov_distance < 0.2 and mov_distance > 0.1:
-			glClearColor(0.6, 0.6, 0, 0.0)
+		# glClearColor(0, 0.6, 0, 0.0)
+		# if mov_distance >= 0.2:
+		# 	glClearColor(1, 0.5, 0.5, 0.0)
+		# elif mov_distance < 0.2 and mov_distance > 0.1:
+		# 	glClearColor(0.6, 0.6, 0, 0.0)
 		
 
 		#update screen
@@ -164,12 +208,11 @@ while 1:
 		glLoadIdentity()
 
 
-		glTranslatef(coords[0], coords[2], coords[1])
-		glRotatef(coord_scale, coords[3], coords[5], coords[4])
+		glTranslatef(coords[1], coords[2], coords[0])
+		glRotatef(coord_scale, coords[4], coords[3], coords[5])
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
 		glCallList(brain.gl_list)
-		#glCallList(brain2.gl_list)
 
 		#keep the current paramenter for calculation distance in the next TR
 		old_params = params

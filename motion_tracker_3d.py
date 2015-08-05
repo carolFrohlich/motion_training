@@ -7,6 +7,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 import numpy as np
+import math
 from objloader import *
 import os
 
@@ -29,12 +30,16 @@ display = (screen_info.current_w, screen_info.current_h)
 
 pichu = pygame.image.load(os.path.join('assets', 'pichu.png'))
 pichurect = pichu.get_rect()
-pichurect.centerx = display[0] / 2 - display[0] * 0.1
+pichurect.centerx = display[0] / 2 - display[0] * 0.2
 pichurect.centery += display[0] * 0.15
 plane = pygame.image.load(os.path.join('assets', 'plane.png'))
 planerect = plane.get_rect()
-planerect.centerx = display[0] / 2 + display[0] * 0.1
+planerect.centerx = display[0] / 2 
 planerect.centery += display[0] * 0.15
+brain = pygame.image.load(os.path.join('assets', 'brain.png'))
+brainrect = brain.get_rect()
+brainrect.centerx = display[0] / 2 + display[0] * 0.2
+brainrect.centery += display[0] * 0.15
 
 
 
@@ -43,6 +48,7 @@ screen = pygame.display.set_mode(display, DOUBLEBUF|RESIZABLE)
 #user choose obj
 screen.blit(pichu, pichurect)
 screen.blit(plane, planerect)
+screen.blit(brain, brainrect)
 pygame.display.flip()
 
 option = 0
@@ -55,6 +61,8 @@ while True:
 			option = 1
 		elif event.type == KEYDOWN and event.key == pygame.K_2:
 			option = 2
+		elif event.type == KEYDOWN and event.key == pygame.K_3:
+			option = 3
 
 	if option != 0:
 		break
@@ -62,27 +70,47 @@ while True:
 
 pichu = None
 plane = None
+brain = None
 screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
 
-glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
-glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-glLightfv(GL_LIGHT0, GL_DIFFUSE, (1, 1, 1, 1.0))
-glEnable(GL_LIGHT0)
+#g
+glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+#g
 
-glLightfv(GL_LIGHT1, GL_POSITION,  (-40, -200, 100, 0.0))
-glLightfv(GL_LIGHT1, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-glLightfv(GL_LIGHT1, GL_DIFFUSE, (1, 1, 1, 1.0))
-glEnable(GL_LIGHT1)
 
-glLightfv(GL_LIGHT2, GL_POSITION,  (40, 200, 100, 0.0))
-glLightfv(GL_LIGHT2, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-glLightfv(GL_LIGHT2, GL_DIFFUSE, (1, 1, 1, 1.0))
-glEnable(GL_LIGHT2)
 
-glLightfv(GL_LIGHT3, GL_POSITION,  (40, -200, 100, 0.0))
-glLightfv(GL_LIGHT3, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
-glLightfv(GL_LIGHT3, GL_DIFFUSE, (1, 1, 1, 1.0))
-glEnable(GL_LIGHT3)
+#if brain
+if option == 3:
+	glLightfv(GL_LIGHT0, GL_POSITION,  (0, -400, 200, 2.5))
+	glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, (1, 1, 1, 1.0))
+	#glLightfv(GL_LIGHT0, GL_SPECULAR, (1, 1, 1, 1.0))
+	#glEnable(GL_LIGHTING)
+	glEnable(GL_LIGHT0)
+
+
+else:
+	glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+	glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, (1, 1, 1, 1.0))
+	glLightfv(GL_LIGHT0, GL_SPECULAR, (1, 1, 1, 1.0))
+	glEnable(GL_LIGHTING)
+	glEnable(GL_LIGHT0)
+
+	glLightfv(GL_LIGHT1, GL_POSITION,  (-40, -200, 100, 0.0))
+	glLightfv(GL_LIGHT1, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, (1, 1, 1, 1.0))
+	glEnable(GL_LIGHT1)
+
+	glLightfv(GL_LIGHT2, GL_POSITION,  (40, 200, 100, 0.0))
+	glLightfv(GL_LIGHT2, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, (1, 1, 1, 1.0))
+	glEnable(GL_LIGHT2)
+
+	glLightfv(GL_LIGHT3, GL_POSITION,  (40, -200, 100, 0.0))
+	glLightfv(GL_LIGHT3, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, (1, 1, 1, 1.0))
+	glEnable(GL_LIGHT3)
 
 
 glEnable(GL_LIGHTING)
@@ -106,7 +134,7 @@ gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
 # glRotatef(180.0, 0.0, 1.0, 0.0)
 # brain = OBJ('Tardis.obj', swapyz=True)
 
-##if pichu
+#if pichu
 if option == 1:
 	brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
 	glTranslatef(0.0,0.0, -200)
@@ -114,18 +142,22 @@ if option == 1:
 	glRotatef(180.0, 0.0, 1.0, 0.0)
 
 # #if plane
-else:
+elif option == 2:
 	brain = OBJ('plane.obj', swapyz=True)
 	glTranslatef(0.0,0.0, -400)
 	glRotatef(90.0, 0.0, 1.0, 0.0)
 	glRotatef(-90.0, 1.0, 0.0, 0.0)
 
 
-#if skull
-# brain = OBJ('SKULL.OBJ', swapyz=True)
-# glTranslatef(0.0,0.0, -30)
-# glRotatef(90.0, 1.0, 0.0, 0.0)
-# glRotatef(180.0, 0.0, 1.0, 0.0)
+#if brain
+else:
+	glMaterialfv(GL_FRONT, GL_SPECULAR,  (1.0, 1.0, 1.0, 50.0))
+	glMaterialfv(GL_FRONT, GL_SHININESS, (50.0))
+	glColor([1.0,0.4,0.6])
+	brain = OBJ('gm.obj', swapyz=True)
+	glTranslatef(0.0,0.0, -500)
+	glRotatef(90.0, 1.0, 0.0, 0.0)
+	glRotatef(180.0, 0.0, 1.0, 0.0)
 
 
 
@@ -178,9 +210,17 @@ while 1:
 			params.append(param)
 
 		###### update screen ######
-
+		print params
 		#scale coordinates.
-		coords = [element*coord_scale for element in params]
+		#coords = [element*coord_scale for element in params]
+
+		coords = []
+		coords.append(params[0]*coord_scale)
+		coords.append(params[1]*coord_scale)
+		coords.append(params[2]*coord_scale)
+		coords.append((params[3]/2*math.pi)*360)
+		coords.append((params[4]/2*math.pi)*360)
+		coords.append((params[5]/2*math.pi)*360)
 
 
 		#and don't let the cross leave the screen
@@ -201,14 +241,13 @@ while 1:
 		# elif mov_distance < 0.2 and mov_distance > 0.1:
 		# 	glClearColor(0.6, 0.6, 0, 0.0)
 		
-
 		#update screen
 
 		glMatrixMode( GL_MODELVIEW )
 		glLoadIdentity()
 
 
-		glTranslatef(coords[1], coords[2], coords[0])
+		#glTranslatef(coords[1], coords[2], coords[0])
 		glRotatef(coord_scale, coords[4], coords[3], coords[5])
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 

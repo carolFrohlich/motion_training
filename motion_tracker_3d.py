@@ -31,15 +31,15 @@ display = (screen_info.current_w, screen_info.current_h)
 pichu = pygame.image.load(os.path.join('assets', 'pichu.png'))
 pichurect = pichu.get_rect()
 pichurect.centerx = display[0] / 2 - display[0] * 0.2
-pichurect.centery += display[0] * 0.15
+pichurect.centery += display[0] * 0.2
 plane = pygame.image.load(os.path.join('assets', 'plane.png'))
 planerect = plane.get_rect()
 planerect.centerx = display[0] / 2 
-planerect.centery += display[0] * 0.15
-brain = pygame.image.load(os.path.join('assets', 'brain.png'))
+planerect.centery += display[0] * 0.2
+brain = pygame.image.load(os.path.join('assets', 'brain2.png'))
 brainrect = brain.get_rect()
 brainrect.centerx = display[0] / 2 + display[0] * 0.2
-brainrect.centery += display[0] * 0.15
+brainrect.centery += display[0] * 0.2
 
 
 
@@ -72,11 +72,7 @@ pichu = None
 plane = None
 brain = None
 screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
-
-#g
 glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
-#g
-
 
 
 #if brain
@@ -121,18 +117,9 @@ glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
 
 glMatrixMode( GL_PROJECTION )
 glLoadIdentity()
-gluPerspective(45, (display[0]/display[1]), 0.1, 500.0)
+gluPerspective(45, (display[0]/display[1]), 0.1, 800.0)
 
 
-
-
-
-
-#if tardis
-# glTranslatef(-5.0,0.0, -40)
-# glRotatef(90.0, 1.0, 0.0, 0.0)
-# glRotatef(180.0, 0.0, 1.0, 0.0)
-# brain = OBJ('Tardis.obj', swapyz=True)
 
 #if pichu
 if option == 1:
@@ -155,9 +142,10 @@ else:
 	glMaterialfv(GL_FRONT, GL_SHININESS, (50.0))
 	glColor([1.0,0.4,0.6])
 	brain = OBJ('gm.obj', swapyz=True)
+
 	glTranslatef(0.0,0.0, -500)
-	glRotatef(90.0, 1.0, 0.0, 0.0)
-	glRotatef(180.0, 0.0, 1.0, 0.0)
+	#glRotatef(90.0, 1.0, 0.0, 0.0)
+	#glRotatef(180.0, 0.0, 1.0, 0.0)
 
 
 
@@ -247,7 +235,7 @@ while 1:
 		glLoadIdentity()
 
 
-		#glTranslatef(coords[1], coords[2], coords[0])
+		glTranslatef(coords[1], coords[0], coords[2])
 		glRotatef(coord_scale, coords[4], coords[3], coords[5])
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 

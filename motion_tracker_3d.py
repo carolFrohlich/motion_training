@@ -14,8 +14,8 @@ import os
 import sys
 
 
-coord_scale=10.0
-
+coord_scale= 0.1
+rotation_scale = 15
 
 
 ###### start psychopy ######
@@ -74,7 +74,7 @@ brain = None
 screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
 glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
-
+zoom = -200
 #if brain
 if option == 3:
 	glLightfv(GL_LIGHT0, GL_POSITION,  (0, -400, 200, 2.5))
@@ -123,27 +123,29 @@ gluPerspective(45, (display[0]/display[1]), 0.1, 800.0)
 
 #if pichu
 if option == 1:
-	brain = OBJ('pichu/XY_Pichu.obj', swapyz=True)
-	glTranslatef(0.0,0.0, -200)
-	glRotatef(80.0, 1.0, 0.0, 0.0)
-	glRotatef(180.0, 0.0, 1.0, 0.0)
+	zoom = -1
+	brain = OBJ('pichu/pichu13.obj', swapyz=True)
+	glTranslatef(0.0,0.0, zoom)
+
 
 # #if plane
 elif option == 2:
+	zoom = -400
 	brain = OBJ('plane.obj', swapyz=True)
-	glTranslatef(0.0,0.0, -400)
+	glTranslatef(0.0,0.0, zoom)
 	glRotatef(90.0, 0.0, 1.0, 0.0)
 	glRotatef(-90.0, 1.0, 0.0, 0.0)
 
 
 #if brain
 else:
+	zoom = -500
 	glMaterialfv(GL_FRONT, GL_SPECULAR,  (1.0, 1.0, 1.0, 50.0))
 	glMaterialfv(GL_FRONT, GL_SHININESS, (50.0))
 	glColor([1.0,0.4,0.6])
 	brain = OBJ('gm.obj', swapyz=True)
 
-	glTranslatef(0.0,0.0, -500)
+	glTranslatef(0.0,0.0, zoom)
 	#glRotatef(90.0, 1.0, 0.0, 0.0)
 	#glRotatef(180.0, 0.0, 1.0, 0.0)
 
@@ -202,10 +204,12 @@ while 1:
 		#scale coordinates.
 		#coords = [element*coord_scale for element in params]
 
+		scale = np.abs(zoom * coord_scale)
+
 		coords = []
-		coords.append(params[0]*coord_scale)
-		coords.append(params[1]*coord_scale)
-		coords.append(params[2]*coord_scale)
+		coords.append(params[0]*scale)
+		coords.append(params[1]*scale)
+		coords.append(params[2]*scale)
 		coords.append((params[3]/2*math.pi)*360)
 		coords.append((params[4]/2*math.pi)*360)
 		coords.append((params[5]/2*math.pi)*360)
@@ -235,8 +239,10 @@ while 1:
 		glLoadIdentity()
 
 
-		glTranslatef(coords[1], coords[0], coords[2])
-		glRotatef(coord_scale, coords[4], coords[3], coords[5])
+		#glTranslatef(coords[1], coords[0], coords[2])
+		glRotatef(rotation_scale, coords[4], coords[3], coords[5])
+
+
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
 		glCallList(brain.gl_list)

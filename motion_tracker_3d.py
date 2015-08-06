@@ -130,11 +130,11 @@ if option == 1:
 
 # #if plane
 elif option == 2:
-	zoom = -400
-	brain = OBJ('plane.obj', swapyz=True)
+	zoom = -1
+	brain = OBJ('plane9.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
-	glRotatef(90.0, 0.0, 1.0, 0.0)
-	glRotatef(-90.0, 1.0, 0.0, 0.0)
+	#glRotatef(90.0, 0.0, 1.0, 0.0)
+	#glRotatef(-90.0, 1.0, 0.0, 0.0)
 
 
 #if brain

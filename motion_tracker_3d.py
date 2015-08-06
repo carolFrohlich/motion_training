@@ -15,7 +15,7 @@ import sys
 
 
 coord_scale= 0.1
-rotation_scale = 15
+rotation_scale = 20
 
 
 ###### start psychopy ######
@@ -200,7 +200,7 @@ while 1:
 			params.append(param)
 
 		###### update screen ######
-		print params
+		#print params
 		#scale coordinates.
 		#coords = [element*coord_scale for element in params]
 
@@ -210,9 +210,9 @@ while 1:
 		coords.append(params[0]*scale)
 		coords.append(params[1]*scale)
 		coords.append(params[2]*scale)
-		coords.append((params[3]/2*math.pi)*360)
-		coords.append((params[4]/2*math.pi)*360)
-		coords.append((params[5]/2*math.pi)*360)
+		coords.append(params[3])#/2*math.pi)*360)
+		coords.append(params[4])#/2*math.pi)*360)
+		coords.append(params[5])#/2*math.pi)*360)
 
 
 		#and don't let the cross leave the screen
@@ -240,7 +240,11 @@ while 1:
 
 
 		#glTranslatef(coords[1], coords[0], coords[2])
-		glRotatef(rotation_scale, coords[4], coords[3], coords[5])
+		#glRotatef(rotation_scale, coords[4], coords[3], coords[5])
+		print coords[4], coords[3], coords[5]
+		glRotatef(coords[4]*rotation_scale, 1.0, 0.0, 0.0)
+		glRotatef(coords[3]*rotation_scale, 0.0, 1.0, 0.0)
+		glRotatef(coords[5]*rotation_scale, 0.0, 0.0, 1.0)
 
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)

@@ -15,7 +15,7 @@ import sys
 
 
 coord_scale= 0.1
-rotation_scale = 20
+rotation_scale = 5
 
 
 ###### start psychopy ######
@@ -117,7 +117,7 @@ glShadeModel(GL_SMOOTH)           # most obj files expect to be smooth-shaded
 
 glMatrixMode( GL_PROJECTION )
 glLoadIdentity()
-gluPerspective(45, (display[0]/display[1]), 0.1, 800.0)
+gluPerspective(45, 1.5, 0.01, 800.0)
 
 
 
@@ -133,22 +133,17 @@ elif option == 2:
 	zoom = -1
 	brain = OBJ('plane9.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
-	#glRotatef(90.0, 0.0, 1.0, 0.0)
-	#glRotatef(-90.0, 1.0, 0.0, 0.0)
 
 
 #if brain
 else:
-	zoom = -500
+	zoom = -1
 	glMaterialfv(GL_FRONT, GL_SPECULAR,  (1.0, 1.0, 1.0, 50.0))
 	glMaterialfv(GL_FRONT, GL_SHININESS, (50.0))
 	glColor([1.0,0.4,0.6])
-	brain = OBJ('gm.obj', swapyz=True)
+	brain = OBJ('brain18.obj', swapyz=True)
 
 	glTranslatef(0.0,0.0, zoom)
-	#glRotatef(90.0, 1.0, 0.0, 0.0)
-	#glRotatef(180.0, 0.0, 1.0, 0.0)
-
 
 
 
@@ -204,12 +199,11 @@ while 1:
 		#scale coordinates.
 		#coords = [element*coord_scale for element in params]
 
-		scale = np.abs(zoom * coord_scale)
 
 		coords = []
-		coords.append(params[0]*scale)
-		coords.append(params[1]*scale)
-		coords.append(params[2]*scale)
+		coords.append(params[0]*coord_scale)
+		coords.append(params[1]*coord_scale)
+		coords.append(params[2]*coord_scale)
 		coords.append(params[3])#/2*math.pi)*360)
 		coords.append(params[4])#/2*math.pi)*360)
 		coords.append(params[5])#/2*math.pi)*360)
@@ -239,9 +233,8 @@ while 1:
 		glLoadIdentity()
 
 
-		#glTranslatef(coords[1], coords[0], coords[2])
-		#glRotatef(rotation_scale, coords[4], coords[3], coords[5])
-		print coords[4], coords[3], coords[5]
+		glTranslatef(coords[1], coords[0], coords[2])
+		
 		glRotatef(coords[4]*rotation_scale, 1.0, 0.0, 0.0)
 		glRotatef(coords[3]*rotation_scale, 0.0, 1.0, 0.0)
 		glRotatef(coords[5]*rotation_scale, 0.0, 0.0, 1.0)

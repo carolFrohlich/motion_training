@@ -195,9 +195,6 @@ while 1:
 			params.append(param)
 
 		###### update screen ######
-		#print params
-		#scale coordinates.
-		#coords = [element*coord_scale for element in params]
 
 
 		coords = []
@@ -209,12 +206,18 @@ while 1:
 		coords.append(params[5])#/2*math.pi)*360)
 
 
-		#and don't let the cross leave the screen
+		#and don't let the obj leave the screen
+		for c in range(3):
+			if coords[c] > 0.35:
+				coords[c] = 0.35
+			if coords[c] < -0.35:
+				coords[c] = -0.35
 		# coords = [0.8 if element> 0.8 else element for element in coords]
 		# coords = [-0.8 if element< -0.8 else element for element in coords]
 		
+		print coords
 
-		###### set cross color according to movment ######
+		###### set background color according to movment ######
 		# calculates distance between last frame head position and current head position.
 		# If participant is almost not moving (distance is <0.1) set color to green
 		# if movment is between 0.1 and 0.1, set color to yelow.

@@ -124,7 +124,7 @@ gluPerspective(45, 1.5, 0.01, 800.0)
 #if pichu
 if option == 1:
 	zoom = -1
-	brain = OBJ('pichu/pichu13.obj', swapyz=True)
+	brain = OBJ('pichu/pichu_smile.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
 
 
@@ -224,12 +224,23 @@ while 1:
 		# and if participant is moving too much (distance >= 0.2) set color to red
 		mov_distance = np.linalg.norm(np.asarray(params) - np.asarray(old_params))
 
-		# glClearColor(0, 0.6, 0, 0.0)
-		# if mov_distance >= 0.2:
-		# 	glClearColor(1, 0.5, 0.5, 0.0)
-		# elif mov_distance < 0.2 and mov_distance > 0.1:
-		# 	glClearColor(0.6, 0.6, 0, 0.0)
+		glClearColor(0, 0.6, 0, 0.0)
+		if mov_distance >= 0.2:
+			glClearColor(1, 0.5, 0.5, 0.0)
+		elif mov_distance < 0.2 and mov_distance > 0.1:
+			glClearColor(0.6, 0.6, 0, 0.0)
 		
+
+		if option == 1:
+			if mov_distance <= 0.1:
+				brain = OBJ('pichu/pichu_smile.obj', swapyz=True)
+			elif mov_distance < 0.2 and mov_distance > 0.1:
+				brain = OBJ('pichu/pichu_ok.obj', swapyz=True)
+			else:
+				brain = OBJ('pichu/pichu_sad.obj', swapyz=True)
+
+
+
 		#update screen
 
 		glMatrixMode( GL_MODELVIEW )

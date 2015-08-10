@@ -71,7 +71,7 @@ while True:
 pichu = None
 plane = None
 brain = None
-screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
+screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE|FULLSCREEN)
 glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
 zoom = -200
@@ -159,8 +159,8 @@ print('finish loading')
 # The default values for running afni rt locally are: ip=127.0.0.1 and port=53214
 # for running on the server: ip=0.0.0.0 and port=8000
 ############################
-TCP_IP = '127.0.0.1'
-TCP_PORT = 53214
+TCP_IP = '0.0.0.0'
+TCP_PORT = 8000
 BUFFER_SIZE = 1024
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -247,7 +247,7 @@ while 1:
 		glLoadIdentity()
 
 
-		glTranslatef(coords[1], coords[0], coords[2])
+		glTranslatef(coords[1], -1*coords[0], -1*coords[2])
 		
 		glRotatef(coords[4]*rotation_scale, 1.0, 0.0, 0.0)
 		glRotatef(coords[3]*rotation_scale, 0.0, 1.0, 0.0)

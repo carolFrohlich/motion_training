@@ -8,7 +8,8 @@ from OpenGL.GLU import *
 
 import numpy as np
 import math
-from objloader import *
+import objloader as loader
+import fasterobj as fasterloader
 import os
 
 import sys
@@ -43,7 +44,7 @@ brainrect.centery += display[0] * 0.2
 
 
 
-screen = pygame.display.set_mode(display, DOUBLEBUF|RESIZABLE)
+screen = pygame.display.set_mode(display, DOUBLEBUF|RESIZABLE|FULLSCREEN)
 
 #user choose obj
 screen.blit(pichu, pichurect)
@@ -54,7 +55,7 @@ pygame.display.flip()
 option = 0
 while True:
 	for event in pygame.event.get():
-		if event.type == QUIT:
+		if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
 			pygame.quit()
 			sys.exit()
 		if event.type == KEYDOWN and event.key == pygame.K_1:
@@ -71,7 +72,7 @@ while True:
 pichu = None
 plane = None
 brain = None
-screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE|FULLSCREEN)
+screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
 glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
 zoom = -200
@@ -120,18 +121,21 @@ glLoadIdentity()
 gluPerspective(45, 1.5, 0.01, 800.0)
 
 
+pichu_smile = fasterloader.OBJ('pichu/pichu_smile.obj')
+pichu_ok = fasterloader.OBJ('pichu/pichu_ok.obj')
+pichu_sad = fasterloader.OBJ('pichu/pichu_sad.obj')
 
 #if pichu
 if option == 1:
 	zoom = -1
-	brain = OBJ('pichu/pichu_smile.obj', swapyz=True)
+	brain = pichu_smile
 	glTranslatef(0.0,0.0, zoom)
 
 
 # #if plane
 elif option == 2:
 	zoom = -1
-	brain = OBJ('plane9.obj', swapyz=True)
+	brain = loader.OBJ('plane9.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
 
 
@@ -141,7 +145,7 @@ else:
 	glMaterialfv(GL_FRONT, GL_SPECULAR,  (1.0, 1.0, 1.0, 50.0))
 	glMaterialfv(GL_FRONT, GL_SHININESS, (50.0))
 	glColor([1.0,0.4,0.6])
-	brain = OBJ('brain18.obj', swapyz=True)
+	brain = loader.OBJ('brain18.obj', swapyz=True)
 
 	glTranslatef(0.0,0.0, zoom)
 
@@ -149,7 +153,12 @@ else:
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-glCallList(brain.gl_list)
+if option == 2 or option == 3:
+	glCallList(brain.gl_list)
+
+else:
+	brain.render()
+
 pygame.display.flip()
 print('finish loading')
 
@@ -159,13 +168,17 @@ print('finish loading')
 # The default values for running afni rt locally are: ip=127.0.0.1 and port=53214
 # for running on the server: ip=0.0.0.0 and port=8000
 ############################
-TCP_IP = '0.0.0.0'
-TCP_PORT = 8000
+TCP_IP = '127.0.0.1'
+TCP_PORT = 53214
 BUFFER_SIZE = 1024
+
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
+
+
+
 conn, addr = s.accept()
 
 
@@ -201,9 +214,9 @@ while 1:
 		coords.append(params[0]*coord_scale)
 		coords.append(params[1]*coord_scale)
 		coords.append(params[2]*coord_scale)
-		coords.append(params[3])#/2*math.pi)*360)
-		coords.append(params[4])#/2*math.pi)*360)
-		coords.append(params[5])#/2*math.pi)*360)
+		coords.append(params[3]*rotation_scale)
+		coords.append(params[4]*rotation_scale)
+		coords.append(params[5]*rotation_scale)
 
 
 		#and don't let the obj leave the screen
@@ -212,10 +225,6 @@ while 1:
 				coords[c] = 0.35
 			if coords[c] < -0.35:
 				coords[c] = -0.35
-		# coords = [0.8 if element> 0.8 else element for element in coords]
-		# coords = [-0.8 if element< -0.8 else element for element in coords]
-		
-		print coords
 
 		###### set background color according to movment ######
 		# calculates distance between last frame head position and current head position.
@@ -233,11 +242,11 @@ while 1:
 
 		if option == 1:
 			if mov_distance <= 0.1:
-				brain = OBJ('pichu/pichu_smile.obj', swapyz=True)
+				brain = pichu_smile
 			elif mov_distance < 0.2 and mov_distance > 0.1:
-				brain = OBJ('pichu/pichu_ok.obj', swapyz=True)
+				brain = pichu_ok
 			else:
-				brain = OBJ('pichu/pichu_sad.obj', swapyz=True)
+				brain = pichu_sad
 
 
 
@@ -250,13 +259,17 @@ while 1:
 		glTranslatef(coords[1], -1*coords[0], -1*coords[2])
 		
 		glRotatef(coords[4]*rotation_scale, 1.0, 0.0, 0.0)
-		glRotatef(coords[3]*rotation_scale, 0.0, 1.0, 0.0)
-		glRotatef(coords[5]*rotation_scale, 0.0, 0.0, 1.0)
+		glRotatef(coords[3]*rotation_scale*-1, 0.0, 1.0, 0.0)
+		glRotatef(coords[5]*rotation_scale*-1, 0.0, 0.0, 1.0)
 
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-		glCallList(brain.gl_list)
+		if option == 2 or option == 3:
+			glCallList(brain.gl_list)
+
+		else:
+			brain.render()
 
 		#keep the current paramenter for calculation distance in the next TR
 		old_params = params

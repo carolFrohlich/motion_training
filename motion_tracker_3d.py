@@ -9,14 +9,14 @@ from OpenGL.GLU import *
 import numpy as np
 import math
 import objloader as loader
-import fasterobj as fasterloader
+#import fasterobj as fasterloader
 import os
 
 import sys
 
 
-coord_scale= 0.1
-rotation_scale = 5
+coord_scale= 0.002
+rotation_scale = 1.5
 
 
 ###### start psychopy ######
@@ -121,14 +121,15 @@ glLoadIdentity()
 gluPerspective(45, 1.5, 0.01, 800.0)
 
 
-pichu_smile = fasterloader.OBJ('pichu/pichu_smile.obj')
-pichu_ok = fasterloader.OBJ('pichu/pichu_ok.obj')
-pichu_sad = fasterloader.OBJ('pichu/pichu_sad.obj')
+pichu_happy = loader.OBJ('pichu/pichu_head2_happy.obj', swapyz=True)
+pichu_ok = loader.OBJ('pichu/pichu_head2_ok.obj', swapyz=True)
+pichu_sad = loader.OBJ('pichu/pichu_head2_sad.obj', swapyz=True)
 
 #if pichu
 if option == 1:
-	zoom = -1
-	brain = pichu_smile
+	zoom = -0.55
+	brain = pichu_happy
+	body = loader.OBJ('pichu/pichu_body5.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
 
 
@@ -137,6 +138,7 @@ elif option == 2:
 	zoom = -1
 	brain = loader.OBJ('plane9.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
+	
 
 
 #if brain
@@ -153,11 +155,14 @@ else:
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-if option == 2 or option == 3:
-	glCallList(brain.gl_list)
+glCallList(brain.gl_list)
 
-else:
-	brain.render()
+if option == 1:
+	glCallList(body.gl_list)
+	
+	
+
+
 
 pygame.display.flip()
 print('finish loading')
@@ -168,9 +173,10 @@ print('finish loading')
 # The default values for running afni rt locally are: ip=127.0.0.1 and port=53214
 # for running on the server: ip=0.0.0.0 and port=8000
 ############################
-TCP_IP = '0.0.0.0'
+TCP_IP = '127.0.0.1'
 TCP_PORT = 53214
 CONTROL_SIZE = 8
+BUFFER_SIZE = 1024
 l_onoff=1
 l_linger=0
 
@@ -194,40 +200,24 @@ old_params = [0.0]*6
 ############################
 while 1:
 
-	data = conn.recv(CONTROL_SIZE)
+	data = conn.recv(BUFFER_SIZE)
 
 	# finish the script when sender don't have more data to send
-	if not data or len(data) != 8: 
-		print "recived bogus control message %s (%d)"%(data,len(data))
-		continue
-
-	print len(data)
-
-	data_lengths=struct.unpack('ii',data)
-	if data_lengths[0] == 0 and data_lengths[1] == 0:
-    	# we have received a terminate request from the user
-    	# respond
-		conn.send(data)
-		# then exit, the remote end will kill the connection
-		break
-
-	if data_lengths[0] != 0:
-		# we have a bogus header, read and discard
-		data = conn.recv(data_lengths[0])
-
+	if not data: break
 
 	# receive 6 mov params in binary. 
 	# The data len is 48, so each parameter has len 8 (double).  
 	# we parse them and put in vector params.
 	# Because not all data we receive movement paramenters, 
 	# we check if data actually has movement params. 
-	elif data_lengths[1] == 48:
-		data = conn.recv(data_lengths[1])
-		params=struct.unpack('dddddd',data)
+	if len(data) == 24:
+
+		params = []
+		for i in range(6):
+			param = struct.unpack('f',  data[i*4:i*4+4])[0]
+			params.append(param)
 
 		###### update screen ######
-
-		print params
 
 		coords = []
 		coords.append(params[0]*coord_scale)
@@ -260,7 +250,7 @@ while 1:
 
 		if option == 1:
 			if mov_distance <= 0.1:
-				brain = pichu_smile
+				brain = pichu_happy
 			elif mov_distance < 0.2 and mov_distance > 0.1:
 				brain = pichu_ok
 			else:
@@ -269,7 +259,7 @@ while 1:
 
 
 		#update screen
-
+		
 		glMatrixMode( GL_MODELVIEW )
 		glLoadIdentity()
 
@@ -283,17 +273,18 @@ while 1:
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
-		if option == 2 or option == 3:
-			glCallList(brain.gl_list)
 
-		else:
-			brain.render()
+		glCallList(brain.gl_list)
+			
+
+		if option == 1:
+			glMatrixMode( GL_MODELVIEW )
+			glLoadIdentity()
+			glCallList(body.gl_list)
 
 		#keep the current paramenter for calculation distance in the next TR
 		old_params = params
 
 		pygame.display.flip()
-	else:
-		print "Recived packet with %d bytes (%d,%d)??"%(len(data),data_lengths[0],data_lengths[1])
 
 conn.close()

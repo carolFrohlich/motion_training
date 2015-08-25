@@ -192,7 +192,8 @@ s.listen(1)
 print 'connecting'
 
 conn, addr = s.accept()
-
+s.setblocking(0)
+conn.setblocking(0)
 
 old_params = [0.0]*6
 
@@ -202,8 +203,18 @@ old_params = [0.0]*6
 # exit when not receiving more data
 ############################
 while 1:
+	data = [0.0]*6
+	try:
+		data = conn.recv(CONTROL_SIZE)
+	except socket.error as ex:
+		glCallList(brain.gl_list)
 
-	data = conn.recv(CONTROL_SIZE)
+		if option == 1:
+			glCallList(body.gl_list)
+			pygame.display.flip()
+		print 'waiting'
+		continue
+
 
 	# finish the script when sender don't have more data to send
 	if not data or len(data) != 8: 

@@ -54,6 +54,7 @@ pygame.display.flip()
 
 option = 0
 while True:
+
 	for event in pygame.event.get():
 		if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
 			pygame.quit()
@@ -202,17 +203,18 @@ old_params = [0.0]*6
 # parses the movement paramenters and update the screen accordingly
 # exit when not receiving more data
 ############################
-while 1:
+while True:
+	#event = pygame.event.wait()
+	for event in pygame.event.get():
+		if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
+			pygame.quit()
+			sys.exit()
+
+
 	data = [0.0]*6
 	try:
 		data = conn.recv(CONTROL_SIZE)
 	except socket.error as ex:
-		glCallList(brain.gl_list)
-
-		if option == 1:
-			glCallList(body.gl_list)
-			pygame.display.flip()
-		print 'waiting'
 		continue
 
 

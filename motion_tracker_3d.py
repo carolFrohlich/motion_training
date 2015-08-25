@@ -75,7 +75,7 @@ brain = None
 screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
 glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
-zoom = -200
+zoom = 0
 #if brain
 if option == 3:
 	glLightfv(GL_LIGHT0, GL_POSITION,  (0, -400, 200, 2.5))
@@ -87,24 +87,24 @@ if option == 3:
 
 
 else:
-	glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 200, 100, 0.0))
+	glLightfv(GL_LIGHT0, GL_POSITION,  (-40, 100, 100, 0.0))
 	glLightfv(GL_LIGHT0, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, (1, 1, 1, 1.0))
 	glLightfv(GL_LIGHT0, GL_SPECULAR, (1, 1, 1, 1.0))
 	glEnable(GL_LIGHTING)
 	glEnable(GL_LIGHT0)
 
-	glLightfv(GL_LIGHT1, GL_POSITION,  (-40, -200, 100, 0.0))
+	glLightfv(GL_LIGHT1, GL_POSITION,  (-40, -100, 100, 0.0))
 	glLightfv(GL_LIGHT1, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, (1, 1, 1, 1.0))
 	glEnable(GL_LIGHT1)
 
-	glLightfv(GL_LIGHT2, GL_POSITION,  (40, 200, 100, 0.0))
+	glLightfv(GL_LIGHT2, GL_POSITION,  (40, 100, 100, 0.0))
 	glLightfv(GL_LIGHT2, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, (1, 1, 1, 1.0))
 	glEnable(GL_LIGHT2)
 
-	glLightfv(GL_LIGHT3, GL_POSITION,  (40, -200, 100, 0.0))
+	glLightfv(GL_LIGHT3, GL_POSITION,  (40, -100, 100, 0.0))
 	glLightfv(GL_LIGHT3, GL_AMBIENT, (0.2, 0.2, 0.2, 1.0))
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, (1, 1, 1, 1.0))
 	glEnable(GL_LIGHT3)
@@ -121,16 +121,18 @@ glLoadIdentity()
 gluPerspective(45, 1.5, 0.01, 800.0)
 
 
-pichu_happy = loader.OBJ('pichu/pichu_head2_happy.obj', swapyz=True)
-pichu_ok = loader.OBJ('pichu/pichu_head2_ok.obj', swapyz=True)
-pichu_sad = loader.OBJ('pichu/pichu_head2_sad.obj', swapyz=True)
+
 
 #if pichu
 if option == 1:
+	pichu_happy = loader.OBJ('pichu/pichu_head2_happy.obj', swapyz=True)
+	pichu_ok = loader.OBJ('pichu/pichu_head2_ok.obj', swapyz=True)
+	pichu_sad = loader.OBJ('pichu/pichu_head2_sad.obj', swapyz=True)
 	zoom = -0.55
 	brain = pichu_happy
 	body = loader.OBJ('pichu/pichu_body5.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
+	coord_scale = 0.002
 
 
 # #if plane
@@ -138,7 +140,7 @@ elif option == 2:
 	zoom = -1
 	brain = loader.OBJ('plane9.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
-	
+	coord_scale = 0.1
 
 
 #if brain
@@ -150,6 +152,7 @@ else:
 	brain = loader.OBJ('brain18.obj', swapyz=True)
 
 	glTranslatef(0.0,0.0, zoom)
+	coord_scale  = 0.1
 
 
 
@@ -173,7 +176,7 @@ print('finish loading')
 # The default values for running afni rt locally are: ip=127.0.0.1 and port=53214
 # for running on the server: ip=0.0.0.0 and port=8000
 ############################
-TCP_IP = '127.0.0.1'
+TCP_IP = '0.0.0.0'
 TCP_PORT = 53214
 CONTROL_SIZE = 8
 BUFFER_SIZE = 1024
@@ -200,22 +203,39 @@ old_params = [0.0]*6
 ############################
 while 1:
 
-	data = conn.recv(BUFFER_SIZE)
+	data = conn.recv(CONTROL_SIZE)
 
 	# finish the script when sender don't have more data to send
-	if not data: break
+	if not data or len(data) != 8: 
+		print "recived bogus control message %s (%d)"%(data,len(data))
+		continue
+
+	print len(data)
+
+	data_lengths=struct.unpack('ii',data)
+	if data_lengths[0] == 0 and data_lengths[1] == 0:
+    	# we have received a terminate request from the user
+    	# respond
+		conn.send(data)
+		# then exit, the remote end will kill the connection
+		break
+
+	if data_lengths[0] != 0:
+		# we have a bogus header, read and discard
+		data = conn.recv(data_lengths[0])
+
 
 	# receive 6 mov params in binary. 
 	# The data len is 48, so each parameter has len 8 (double).  
 	# we parse them and put in vector params.
 	# Because not all data we receive movement paramenters, 
 	# we check if data actually has movement params. 
-	if len(data) == 24:
+	elif data_lengths[1] == 48:
+		data = conn.recv(data_lengths[1])
+		params=struct.unpack('dddddd',data)
 
-		params = []
-		for i in range(6):
-			param = struct.unpack('f',  data[i*4:i*4+4])[0]
-			params.append(param)
+
+		print params
 
 		###### update screen ######
 

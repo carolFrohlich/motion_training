@@ -15,7 +15,7 @@ import os
 import sys
 
 
-coord_scale= 0.002
+coord_scale = 0.1
 rotation_scale = 1.5
 
 
@@ -44,7 +44,7 @@ brainrect.centery += display[0] * 0.2
 
 
 
-screen = pygame.display.set_mode(display, DOUBLEBUF|RESIZABLE|FULLSCREEN)
+screen = pygame.display.set_mode(display, DOUBLEBUF|FULLSCREEN)
 
 #user choose obj
 screen.blit(pichu, pichurect)
@@ -126,14 +126,12 @@ gluPerspective(45, 1.5, 0.01, 800.0)
 
 #if pichu
 if option == 1:
-	pichu_happy = loader.OBJ('pichu/pichu_head2_happy.obj', swapyz=True)
-	pichu_ok = loader.OBJ('pichu/pichu_head2_ok.obj', swapyz=True)
-	pichu_sad = loader.OBJ('pichu/pichu_head2_sad.obj', swapyz=True)
-	zoom = -0.55
+	pichu_happy = loader.OBJ('pichu/pichu_smile.obj', swapyz=True)
+	pichu_ok = loader.OBJ('pichu/pichu_ok.obj', swapyz=True)
+	pichu_sad = loader.OBJ('pichu/pichu_sad.obj', swapyz=True)
+	zoom = -0.6
 	brain = pichu_happy
-	body = loader.OBJ('pichu/pichu_body5.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
-	coord_scale = 0.002
 
 
 # #if plane
@@ -141,7 +139,7 @@ elif option == 2:
 	zoom = -1
 	brain = loader.OBJ('plane9.obj', swapyz=True)
 	glTranslatef(0.0,0.0, zoom)
-	coord_scale = 0.1
+	
 
 
 #if brain
@@ -153,18 +151,12 @@ else:
 	brain = loader.OBJ('brain18.obj', swapyz=True)
 
 	glTranslatef(0.0,0.0, zoom)
-	coord_scale  = 0.1
 
 
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
 glCallList(brain.gl_list)
-
-if option == 1:
-	glCallList(body.gl_list)
-	
-	
 
 
 
@@ -191,8 +183,19 @@ s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 
 print 'connecting'
+import datetime
+
+log_file = open('motion' + str(datetime.datetime.now()) +'.log', 'wb')
+if option == 1:
+	log_file.write('pichu\n')
+elif option == 2:
+	log_file.write('plane\n')
+else:
+	log_file.write('brain\n')
+
 
 conn, addr = s.accept()
+
 s.setblocking(0)
 conn.setblocking(0)
 
@@ -205,13 +208,18 @@ old_params = [0.0]*6
 ############################
 while True:
 	#event = pygame.event.wait()
+	print 1
 	for event in pygame.event.get():
+		print 2
 		if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
+			print 3
+			log_file.close()
 			pygame.quit()
 			sys.exit()
 
 
 	data = [0.0]*6
+	print 4
 	try:
 		data = conn.recv(CONTROL_SIZE)
 	except socket.error as ex:
@@ -247,8 +255,7 @@ while True:
 		data = conn.recv(data_lengths[1])
 		params=struct.unpack('dddddd',data)
 
-
-		print params
+		log_file.write(str(params)[1:-1] + '\n')
 
 		###### update screen ######
 
@@ -272,23 +279,24 @@ while True:
 		# If participant is almost not moving (distance is <0.1) set color to green
 		# if movment is between 0.1 and 0.1, set color to yelow.
 		# and if participant is moving too much (distance >= 0.2) set color to red
-		mov_distance = np.linalg.norm(np.asarray(params) - np.asarray(old_params))
+		mov_distance = np.linalg.norm(np.asarray(params[:3]) - np.asarray(old_params[:3]))+\
+            80*2*np.pi*(np.linalg.norm(np.asarray(params[3:]) - np.asarray(old_params[3:]))/360)
+		print "moved %f mm"%(mov_distance)
 
 		glClearColor(0, 0.6, 0, 0.0)
-		if mov_distance >= 0.2:
+		if mov_distance > 0.3:
 			glClearColor(1, 0.5, 0.5, 0.0)
-		elif mov_distance < 0.2 and mov_distance > 0.1:
+		elif mov_distance <= 0.3 and mov_distance > 0.2:
 			glClearColor(0.6, 0.6, 0, 0.0)
 		
 
 		if option == 1:
-			if mov_distance <= 0.1:
+			if mov_distance <= 0.2:
 				brain = pichu_happy
-			elif mov_distance < 0.2 and mov_distance > 0.1:
+			elif mov_distance < 0.3 and mov_distance > 0.2:
 				brain = pichu_ok
 			else:
 				brain = pichu_sad
-
 
 
 		#update screen
@@ -297,7 +305,7 @@ while True:
 		glLoadIdentity()
 
 
-		glTranslatef(coords[1], -1*coords[0], -1*coords[2])
+		glTranslatef(-1*coords[1], coords[0], coords[2])
 		
 		glRotatef(coords[4]*rotation_scale, 1.0, 0.0, 0.0)
 		glRotatef(coords[3]*rotation_scale*-1, 0.0, 1.0, 0.0)
@@ -310,14 +318,10 @@ while True:
 		glCallList(brain.gl_list)
 			
 
-		if option == 1:
-			glMatrixMode( GL_MODELVIEW )
-			glLoadIdentity()
-			glCallList(body.gl_list)
-
 		#keep the current paramenter for calculation distance in the next TR
 		old_params = params
 
 		pygame.display.flip()
 
 conn.close()
+log_file.close()

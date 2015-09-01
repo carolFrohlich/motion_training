@@ -31,13 +31,14 @@ rotation_scale = 1.5
 
 
 instructions = [
-	'Lorem ipsum dolor sit amet, consectetur adipiscing elit,', 
-	'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 
-	'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
-	'nisi ut aliquip ex ea commodo consequat.',
-	'Duis aute irure dolor in reprehenderit in voluptate',
-	'velit esse cillum dolore eu fugiat nulla pariatur.'
+	'It is very important that you keep your head still during the MRI scan.',
+	'This game will show you how much your head moves using a 3D character.',
+	'When your head moves, the character will move. The background will change',
+	'color based on how much your head moves. Green is good and Red is too much.',
+	'To play the game, tell the operator which character you would like to be and',
+	'then follow the instructions at the bottom of the screen.'
 	]
+
 
 
 ###### start psychopy ######

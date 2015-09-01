@@ -11,8 +11,29 @@ import math
 import objloader as loader
 #import fasterobj as fasterloader
 import os
-
 import sys
+
+from psychopy import core
+
+
+import OpenGL.GL as ogl  
+def draw_text(position, text):     
+    font = pygame.font.Font (None, 64)
+    textSurface = font.render(text, True, (255,255,255,255), (0,0,0,255))     
+    textData = pygame.image.tostring(textSurface, "RGBA", True)     
+    glRasterPos3d(*position)     
+    glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
+
+
+texts = [
+	{'text':'Move your head and watch pichu follow you', 'time': 20},
+	{'text':'Now practice staying still', 'time': 20},
+	{'text':'Cough', 'time': 5},
+	{'text':'Wiggle your feet', 'time': 5},
+	{'text':'Move your hands', 'time': 5},
+	{'text':'See how these small things move your head?', 'time': 5},
+	{'text':'Practice staying very still', 'time': 30}
+	]
 
 
 coord_scale = 0.1
@@ -158,8 +179,6 @@ glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
 glCallList(brain.gl_list)
 
-
-
 pygame.display.flip()
 print('finish loading')
 
@@ -206,20 +225,28 @@ old_params = [0.0]*6
 # parses the movement paramenters and update the screen accordingly
 # exit when not receiving more data
 ############################
+clock = core.Clock()
+text_index = 0
 while True:
 	#event = pygame.event.wait()
-	print 1
+	
+	if clock.getTime() >= texts[text_index]['time']:
+		if text_index < len(texts) - 1:
+			text_index += 1
+			clock.reset()
+			draw_text([-0.2,-0.2,0.0],texts[text_index]['text'])
+
+
 	for event in pygame.event.get():
-		print 2
+
 		if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
-			print 3
+
 			log_file.close()
 			pygame.quit()
 			sys.exit()
 
 
 	data = [0.0]*6
-	print 4
 	try:
 		data = conn.recv(CONTROL_SIZE)
 	except socket.error as ex:
@@ -320,6 +347,10 @@ while True:
 
 		#keep the current paramenter for calculation distance in the next TR
 		old_params = params
+
+		glMatrixMode( GL_MODELVIEW )
+		glLoadIdentity()
+		draw_text([-0.2,-0.2,0.0],texts[text_index]['text'])
 
 		pygame.display.flip()
 

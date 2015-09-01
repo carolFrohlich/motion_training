@@ -17,23 +17,13 @@ from psychopy import core
 
 
 import OpenGL.GL as ogl  
-def draw_text(position, text):     
-    font = pygame.font.Font (None, 64)
-    textSurface = font.render(text, True, (255,255,255,255), (0,0,0,255))     
-    textData = pygame.image.tostring(textSurface, "RGBA", True)     
-    glRasterPos3d(*position)     
+def draw_text(position, text, last_color): 
+    font = pygame.font.Font (None, 72)
+    textSurface = font.render(text, True, (255,255,255,255), last_color )     
+    textData = pygame.image.tostring(textSurface, "RGBA", True)    
+    glRasterPos3d(*position)
     glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
-
-texts = [
-	{'text':'Move your head and watch pichu follow you', 'time': 20},
-	{'text':'Now practice staying still', 'time': 20},
-	{'text':'Cough', 'time': 5},
-	{'text':'Wiggle your feet', 'time': 5},
-	{'text':'Move your hands', 'time': 5},
-	{'text':'See how these small things move your head?', 'time': 5},
-	{'text':'Practice staying very still', 'time': 30}
-	]
 
 
 coord_scale = 0.1
@@ -90,6 +80,22 @@ while True:
 	if option != 0:
 		break
 
+obj_name = 'pichu'
+if option == 2:
+	obj_name = 'plane'
+elif option == 3:
+	obj_name = 'brain'
+
+
+texts = [
+	{'text':'Move your head and watch '+ obj_name +' follow you', 'time': 20, 'offset': -0.2},
+	{'text':'Now practice staying still', 'time': 20, 'offset':-0.13},
+	{'text':'Cough', 'time': 5, 'offset':-0.05},
+	{'text':'Wiggle your feet', 'time': 5, 'offset':-0.1},
+	{'text':'Move your hands', 'time': 5, 'offset':-0.1},
+	{'text':'See how these small things move your head?', 'time': 5, 'offset':-0.2},
+	{'text':'Practice staying very still', 'time': 30, 'offset':-0.1}
+	]
 
 pichu = None
 plane = None
@@ -204,7 +210,7 @@ s.listen(1)
 print 'connecting'
 import datetime
 
-log_file = open('motion' + str(datetime.datetime.now()) +'.log', 'wb')
+log_file = open('motion' + datetime.datetime.now().strftime("%Y-%m-%d%H%M") +'.log', 'wb')
 if option == 1:
 	log_file.write('pichu\n')
 elif option == 2:
@@ -227,14 +233,29 @@ old_params = [0.0]*6
 ############################
 clock = core.Clock()
 text_index = 0
+last_color = (0,0,0,0)
 while True:
 	#event = pygame.event.wait()
+	if clock.getTime() >= texts[text_index]['time']:
+		if text_index < len(texts) - 1:
+			text_index += 1
+			clock.reset()
+
+			if option == 1:
+				draw_text([texts[text_index]['offset'],-0.15,0.0],texts[text_index]['text'], last_color)
+			else:
+				draw_text([texts[text_index]['offset']*1.4,-0.25,0.0],texts[text_index]['text'], last_color)
+
+
 	
 	if clock.getTime() >= texts[text_index]['time']:
 		if text_index < len(texts) - 1:
 			text_index += 1
 			clock.reset()
-			draw_text([-0.2,-0.2,0.0],texts[text_index]['text'])
+			if option == 1:
+				draw_text([texts[text_index]['offset'],-0.15,0.0],texts[text_index]['text'], last_color)
+			else:
+				draw_text([texts[text_index]['offset']*1.4,-0.2,0.0],texts[text_index]['text'], last_color)
 
 
 	for event in pygame.event.get():
@@ -311,10 +332,13 @@ while True:
 		print "moved %f mm"%(mov_distance)
 
 		glClearColor(0, 0.6, 0, 0.0)
-		if mov_distance > 0.3:
+		last_color = (0, 0.6*255, 0, 255)
+		if mov_distance >= 0.2:
 			glClearColor(1, 0.5, 0.5, 0.0)
-		elif mov_distance <= 0.3 and mov_distance > 0.2:
+			last_color = (255, 0.5*255, 255*0.5, 255)
+		elif mov_distance < 0.2 and mov_distance > 0.1:
 			glClearColor(0.6, 0.6, 0, 0.0)
+			last_color = (0.6*255, 0.6*255, 0, 255)
 		
 
 		if option == 1:
@@ -350,7 +374,11 @@ while True:
 
 		glMatrixMode( GL_MODELVIEW )
 		glLoadIdentity()
-		draw_text([-0.2,-0.2,0.0],texts[text_index]['text'])
+		if option == 1:
+				draw_text([texts[text_index]['offset'],-0.15,0.0],texts[text_index]['text'], last_color)
+		else:
+			draw_text([texts[text_index]['offset']*1.4,-0.25,0.0],texts[text_index]['text'], last_color)
+
 
 		pygame.display.flip()
 

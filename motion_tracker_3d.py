@@ -30,6 +30,16 @@ coord_scale = 0.1
 rotation_scale = 1.5
 
 
+instructions = [
+	'Lorem ipsum dolor sit amet, consectetur adipiscing elit,', 
+	'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 
+	'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris',
+	'nisi ut aliquip ex ea commodo consequat.',
+	'Duis aute irure dolor in reprehenderit in voluptate',
+	'velit esse cillum dolore eu fugiat nulla pariatur.'
+	]
+
+
 ###### start psychopy ######
 #creates a full screen window and draw a white cross on the screen while waiting for inputs
 ############################
@@ -38,7 +48,46 @@ pygame.init()
 screen_info = pygame.display.Info()
 #display = (800,600)
 display = (screen_info.current_w, screen_info.current_h)
+screen = pygame.display.set_mode(display, DOUBLEBUF|FULLSCREEN)
 
+#show instructions
+background = pygame.Surface(screen.get_size())
+background = background.convert()
+background.fill((0, 0, 0))
+
+
+for i in range(len(instructions)):
+	font = pygame.font.Font(None, 72)
+	text = font.render(instructions[i], 1, (255, 255, 255))
+	textpos = text.get_rect()
+	textpos.centerx = background.get_rect().centerx
+	textpos.centery = 80 + 80*i
+	background.blit(text, textpos)
+
+	# Blit everything to the screen
+	screen.blit(background, (0, 0))
+
+pygame.display.flip()
+
+
+while True:
+	stop = False
+	for event in pygame.event.get():
+		if event.type == KEYDOWN and event.key == pygame.K_ESCAPE:
+			pygame.quit()
+			sys.exit()
+		if event.type == KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_1):
+			stop = True
+
+	if stop:
+		font = None
+		background = None
+		break
+
+
+screen = pygame.display.set_mode(display, DOUBLEBUF|FULLSCREEN)
+
+#show menu
 
 pichu = pygame.image.load(os.path.join('assets', 'pichu.png'))
 pichurect = pichu.get_rect()
@@ -100,7 +149,7 @@ texts = [
 pichu = None
 plane = None
 brain = None
-screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|RESIZABLE)
+screen = pygame.display.set_mode(display, DOUBLEBUF|OPENGL|FULLSCREEN)
 glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
 
 zoom = 0

@@ -18,7 +18,7 @@ from psychopy import core
 
 import OpenGL.GL as ogl  
 def draw_text(position, text, last_color): 
-    font = pygame.font.Font (None, 72)
+    font = pygame.font.Font (None, 64)
     textSurface = font.render(text, True, (255,255,255,255), last_color )     
     textData = pygame.image.tostring(textSurface, "RGBA", True)    
     glRasterPos3d(*position)
@@ -31,14 +31,19 @@ rotation_scale = 1.5
 
 
 instructions = [
-	'It is very important that you keep your head still during the MRI scan.',
-	'This game will show you how much your head moves using a 3D character.',
-	'When your head moves, the character will move. The background will change',
-	'color based on how much your head moves. Green is good and Red is too much.',
-	'To play the game, tell the operator which character you would like to be and',
-	'then follow the instructions at the bottom of the screen.'
+	'It is very important that you keep',
+    'your head still during the MRI scan.',
+	'This game will show you how much your',
+    'head moves using a 3D cartoon. When',
+    'your head moves, the cartoon will move.', 
+    'The background will change color based on',
+    'how much your head moves. Green is good',
+    'and Red is too much.',
+    ' ',
+	'To play the game, tell the operator which',
+    'cartoon you would like to be and then ',
+    'follow the instructions at the bottom of the screen.'
 	]
-
 
 
 ###### start psychopy ######
@@ -58,11 +63,11 @@ background.fill((0, 0, 0))
 
 
 for i in range(len(instructions)):
-	font = pygame.font.Font(None, 72)
-	text = font.render(instructions[i], 1, (255, 255, 255))
+	font = pygame.font.Font(None, 64)
+	text = font.render(instructions[i], 1, (255,255,255,255))
 	textpos = text.get_rect()
 	textpos.centerx = background.get_rect().centerx
-	textpos.centery = 80 + 80*i
+	textpos.centery = 192 + 50*i
 	background.blit(text, textpos)
 
 	# Blit everything to the screen
@@ -105,6 +110,8 @@ brainrect.centery += display[0] * 0.2
 
 
 
+    
+
 screen = pygame.display.set_mode(display, DOUBLEBUF|FULLSCREEN)
 
 #user choose obj
@@ -132,19 +139,19 @@ while True:
 
 obj_name = 'pichu'
 if option == 2:
-	obj_name = 'plane'
+	obj_name = 'the plane'
 elif option == 3:
-	obj_name = 'brain'
+	obj_name = 'the brain'
 
 
 texts = [
-	{'text':'Move your head and watch '+ obj_name +' follow you', 'time': 20, 'offset': -0.2},
-	{'text':'Now practice staying still', 'time': 20, 'offset':-0.13},
-	{'text':'Cough', 'time': 5, 'offset':-0.05},
+	{'text':'Move your head and watch '+ obj_name +' follow you', 'time': 20, 'offset': -0.28},
+	{'text':'Now practice staying still', 'time': 20, 'offset':-0.15},
+	{'text':'Cough', 'time': 5, 'offset':-0.035},
 	{'text':'Wiggle your feet', 'time': 5, 'offset':-0.1},
 	{'text':'Move your hands', 'time': 5, 'offset':-0.1},
-	{'text':'See how these small things move your head?', 'time': 5, 'offset':-0.2},
-	{'text':'Practice staying very still', 'time': 30, 'offset':-0.1}
+	{'text':'See how these small things move your head?', 'time': 5, 'offset':-0.28},
+	{'text':'Practice staying very still', 'time': 30, 'offset':-0.15}
 	]
 
 pichu = None
@@ -230,6 +237,8 @@ else:
 	glTranslatef(0.0,0.0, zoom)
 
 
+text_index = 0
+
 
 glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
@@ -262,11 +271,11 @@ import datetime
 
 log_file = open('motion' + datetime.datetime.now().strftime("%Y-%m-%d%H%M") +'.log', 'wb')
 if option == 1:
-	log_file.write('pichu\n')
+	log_file.write('Pichu\n')
 elif option == 2:
-	log_file.write('plane\n')
+	log_file.write('the plane\n')
 else:
-	log_file.write('brain\n')
+	log_file.write('the brain\n')
 
 
 conn, addr = s.accept()
@@ -294,7 +303,7 @@ while True:
 			if option == 1:
 				draw_text([texts[text_index]['offset'],-0.15,0.0],texts[text_index]['text'], last_color)
 			else:
-				draw_text([texts[text_index]['offset']*1.4,-0.25,0.0],texts[text_index]['text'], last_color)
+				draw_text([texts[text_index]['offset']*1.7,-0.25,0.0],texts[text_index]['text'], last_color)
 
 
 	
@@ -305,7 +314,7 @@ while True:
 			if option == 1:
 				draw_text([texts[text_index]['offset'],-0.15,0.0],texts[text_index]['text'], last_color)
 			else:
-				draw_text([texts[text_index]['offset']*1.4,-0.2,0.0],texts[text_index]['text'], last_color)
+				draw_text([texts[text_index]['offset']*1.7,-0.2,0.0],texts[text_index]['text'], last_color)
 
 
 	for event in pygame.event.get():
@@ -427,7 +436,7 @@ while True:
 		if option == 1:
 				draw_text([texts[text_index]['offset'],-0.15,0.0],texts[text_index]['text'], last_color)
 		else:
-			draw_text([texts[text_index]['offset']*1.4,-0.25,0.0],texts[text_index]['text'], last_color)
+			draw_text([texts[text_index]['offset']*1.7,-0.25,0.0],texts[text_index]['text'], last_color)
 
 
 		pygame.display.flip()

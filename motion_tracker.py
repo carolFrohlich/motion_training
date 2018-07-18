@@ -58,7 +58,7 @@ def cross_draw(cross):
 ###### start psychopy ######
 #creates a full screen window and draw a white cross on the screen while waiting for inputs
 ############################
-win = visual.Window( [1024, 768], fullscr=True)
+win = visual.Window( [1024, 768], fullscr=False)
 cross = build_cross(SCALE)
 cross_draw(cross)
 win.flip()

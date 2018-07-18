@@ -136,7 +136,7 @@ while 1:
 		if z_coord < -0.85:
 			z_coord = 0.85
 
-		cross_pos(cross, y_coord, y_coord)
+		cross_pos(cross, x_coord, z_coord)
 		
 
 		###### set cross color according to movment ######
